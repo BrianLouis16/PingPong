@@ -1,79 +1,91 @@
-from turtle import Screen
-from paddle import Paddle
-from ball import Ball
-from score import Scoreboard
-import time
+from helloword import MENU
 
-screen = Screen()
-screen.bgcolor("black")
-
-# Create a Scoreboard instance
-scoreboard = Scoreboard()
-
-screen.tracer(0)
-
-paddle_1 = Paddle()
-paddle_2 = Paddle()
-paddle_2.create_paddle_two()
-
-ball = Ball()
+resources = {
+    "water": 300,
+    "milk": 200,
+    "coffee": 100,
+}
 
 
-def up_paddle_1():
-    new_y = paddle_1.ycor() + 40  # Adjust the new y-coordinate
-    paddle_1.goto(paddle_1.xcor(), new_y)
+def quarters():
+    amount = int(input("How many quarters do you have?: ")) * 0.25
+    return amount
 
 
-def down_paddle_1():
-    new_y = paddle_1.ycor() - 40  # Adjust the new y-coordinate
-    paddle_1.goto(paddle_1.xcor(), new_y)
+def dimes():
+    amount = int(input("How many dimes do you have?: ")) * 0.10
+    return amount
 
 
-def up_paddle_2():
-    new_y = paddle_2.ycor() + 40  # Adjust the new y-coordinate
-    paddle_2.goto(paddle_2.xcor(), new_y)
+def nickel():
+    amount = int(input("How many nickel do you have?: ")) * 0.05
+    return amount
 
 
-def down_paddle_2():
-    new_y = paddle_2.ycor() - 40  # Adjust the new y-coordinate
-    paddle_2.goto(paddle_2.xcor(), new_y)
+def pennies():
+    amount = int(input("How many pennies do you have?: ")) * 0.01
+    return amount
 
 
-def exit_game():
-    screen.bye()  # Close the Turtle graphics window
-
-
-screen.listen()
-screen.onkeypress(up_paddle_1, "Up")
-screen.onkeypress(down_paddle_1, "Down")
-screen.onkeypress(up_paddle_2, "w")
-screen.onkeypress(down_paddle_2, "s")
-screen.onkeypress(exit_game, "q")
+def get_coffee():
+    user = input("Which coffee would you like (espresso/latte/cappuccino)?: ")
+    if user in MENU:
+        coffee_info = MENU[user]
+        return coffee_info
+    else:
+        return None
 
 
 
-game_is_on = True
-while game_is_on:
-    time.sleep(0.05)
-    screen.update()
-    ball.move()
+while True:
+    coffee_info = get_coffee()
+    water = resources["water"]
+    milk = resources["milk"]
+    coffee = resources["coffee"]
+    if coffee_info is not None:
+        cost = coffee_info["cost"]
 
-    if ball.ycor() > 300 or ball.ycor() < -300:
-        ball.bounce_y()
+        water_cost = coffee_info["ingredients"]["water"]
 
-    if ball.distance(paddle_1) < 50 and ball.xcor() > 340:
-        ball.bounce_x()
+        coffee_cost = coffee_info["ingredients"]["coffee"]
 
-    if ball.distance(paddle_2) < 50 and ball.xcor() < -340:
-        ball.bounce_x()
+        if "milk" in coffee_info["ingredients"]:
+            milk_cost = coffee_info["ingredients"]["milk"]
+        else:
+            milk_cost = 0
 
-    if ball.xcor() > 350:
-        # Player 2 scores a point
-        ball.reset_position()
-        scoreboard.increase_score_2(paddle_2)
+        change = round(quarters() + dimes() + nickel() + pennies(), 2)
 
-    if ball.xcor() < -350:
-        # Player 1 scores a point
-        ball.reset_position()
-        scoreboard.increase_score_1(paddle_1)
+        if change >= cost:
+            change = change - cost
 
+            print(f"You have enough. Your change is {change}")
+            # Deduct resources
+
+            water -= water_cost
+            milk -= milk_cost
+            coffee -= coffee_cost
+            if water <= 0:
+                print("You do not have enough water. ")
+                user = input("Would you like to add some water y/n .: ").lower()
+                if user == "yes":
+                    water += 450
+            elif milk <= 0:
+                print("You do not have enough coffee.")
+                user = input("Would you like to add some water y/n .: ").lower()
+                if user == "yes":
+                    milk += 450
+            elif coffee <= 0:
+                print("You do not have enough coffee")
+                user = input("Would you like to add some coffee? y/n .: ").lower()
+                if user == "yes":
+                    water += 450
+        else:
+            print("Not enough, you have been refunded")
+    else:
+        print("Invalid coffee choice")
+        get_coffee()
+    print("Thank you for buying from the vending machine!")
+    again = input("Would you like to buy another coffee? (yes/no) : ").lower()
+    if again != "yes":
+        break
